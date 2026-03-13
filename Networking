@@ -1,0 +1,314 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct frame {
+    int info;
+    int seq;
+};
+
+struct frame p;
+int ack;
+char turn = 's';
+int errorframe = 1;
+int errorack = 1;
+
+void sender();
+void receiver();
+
+int main() {
+    p.info = 0;
+    p.seq = 0;
+
+    while (p.seq < 5) {
+        sender();
+        receiver();
+    }
+
+    return 0;
+}
+
+void sender() {
+    if (turn == 's') {
+        printf("SENDER: Sent packet with seq %d\n", p.seq);
+
+        errorframe = rand() % 4;
+
+        if (errorframe == 0)
+            printf("Error while sending packet\n");
+
+        turn = 'r';
+    }
+}
+
+void receiver() {
+    if (turn == 'r') {
+        if (errorframe != 0) {
+            printf("RECEIVER: Received packet %d\n", p.seq);
+
+            ack = p.seq;
+            printf("RECEIVER: Sent ACK %d\n", ack);
+
+            p.seq++;
+        } else {
+            printf("RECEIVER: Packet lost\n");
+        }
+
+        turn = 's';
+    }
+}
+
+
+
+
+
+#include <stdio.h>
+#define MAX 10 #define 
+INF 999
+int main() {
+ int cost[MAX][MAX], dist[MAX][MAX];
+ int n, i, j, k;
+ printf("Enter number of routers: "); scanf("%d", &n); 
+printf("Enter cost matrix (enter 999 for no direct path):\n");
+ for(i = 0; i < n; i++)
+ {
+ for(j = 0; j < n; j++)
+ {
+ scanf("%d", &cost[i][j]);
+ dist[i][j] = cost[i][j]; // Initialize routing table
+ }
+ }
+ for(k = 0; k < n; k++)
+ {
+ for(i = 0; i < n; i++)
+ {
+ for(j = 0; j < n; j++)
+ {
+ if(dist[i][j] > dist[i][k] + dist[k][j])
+ {
+ dist[i][j] = dist[i][k] + dist[k][j];
+ }
+ }
+ }
+ }
+ printf("\nFinal Routing Tables:\n");
+ for(i = 0; i < n; i++)
+ {
+ printf("\nRouter %d:\n", i);
+ for(j = 0; j < n; j++)
+ {
+ printf("To %d -> Cost = %d\n", j, dist[i][j]);
+ } 
+}
+
+
+UDP
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <arpa/inet.h>
+
+#define PORT 2050
+#define MAX 100
+
+int main()
+{
+    int sockfd;
+    char buffer[MAX];
+    struct sockaddr_in server, client;
+    socklen_t len;
+
+    // Create socket
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    printf("Socket created\n");
+
+    // Server details
+    server.sin_family = AF_INET;
+    server.sin_addr.s_addr = INADDR_ANY;
+    server.sin_port = htons(PORT);
+
+    // Bind
+    bind(sockfd, (struct sockaddr *)&server, sizeof(server));
+    printf("Server waiting...\n");
+
+    len = sizeof(client);
+
+    // Receive message
+    recvfrom(sockfd, buffer, MAX, 0, (struct sockaddr *)&client, &len);
+
+    printf("Message from client: %s", buffer);
+
+    return 0;
+}
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <arpa/inet.h>
+
+#define PORT 2050
+#define MAX 100
+
+int main()
+{
+    int sockfd;
+    char buffer[MAX];
+    struct sockaddr_in server;
+
+    // Create socket
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    printf("Socket created\n");
+
+    // Server details
+    server.sin_family = AF_INET;
+    server.sin_port = htons(PORT);
+    server.sin_addr.s_addr = inet_addr("127.0.0.1");
+
+    printf("Enter message: ");
+    fgets(buffer, MAX, stdin);
+
+    // Send message
+    sendto(sockfd, buffer, MAX, 0, (struct sockaddr *)&server, sizeof(server));
+
+    printf("Message sent to server\n");
+
+    return 0;
+}
+
+
+
+
+TCP
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+
+#define PORT 8080
+#define MAX 100
+
+int main()
+{
+    int server_fd, new_socket;
+    struct sockaddr_in address;
+    char buffer[MAX];
+
+    // Create socket
+    server_fd = socket(AF_INET, SOCK_STREAM, 0);
+    printf("Socket created\n");
+
+    // Set server details
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_port = htons(PORT);
+
+    // Bind socket
+    bind(server_fd, (struct sockaddr *)&address, sizeof(address));
+    printf("Bind done\n");
+
+    // Listen
+    listen(server_fd, 3);
+    printf("Waiting for client...\n");
+
+    // Accept connection
+    new_socket = accept(server_fd, NULL, NULL);
+    printf("Client connected\n");
+
+    while (1)
+    {
+        // Receive message
+        read(new_socket, buffer, MAX);
+        printf("Client: %s", buffer);
+
+        // Send reply
+        printf("Server: ");
+        fgets(buffer, MAX, stdin);
+        write(new_socket, buffer, MAX);
+
+        if(strncmp(buffer,"exit",4)==0)
+            break;
+    }
+
+    close(new_socket);
+    close(server_fd);
+
+    return 0;
+}
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+
+#define PORT 8080
+#define MAX 100
+
+int main()
+{
+    int sockfd;
+    struct sockaddr_in server;
+    char buffer[MAX];
+
+    // Create socket
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    printf("Socket created\n");
+
+    // Server details
+    server.sin_family = AF_INET;
+    server.sin_port = htons(PORT);
+    server.sin_addr.s_addr = inet_addr("127.0.0.1");
+
+    // Connect to server
+    connect(sockfd, (struct sockaddr *)&server, sizeof(server));
+    printf("Connected to server\n");
+
+    while (1)
+    {
+        printf("Client: ");
+        fgets(buffer, MAX, stdin);
+        write(sockfd, buffer, MAX);
+
+        read(sockfd, buffer, MAX);
+        printf("Server: %s", buffer);
+
+        if(strncmp(buffer,"exit",4)==0)
+            break;
+    }
+
+    close(sockfd);
+
+    return 0;
+}
+
+
+leaky
+include <stdio.h>
+int main(){
+int incoming, outgoing, buck_size, n, store = 0;
+printf("Enter bucket size, outgoing rate and no of inputs: ");
+scanf("%d %d %d", &buck_size, &outgoing, &n);
+while(n != 0){
+printf("Enter the incoming packet size: ");
+scanf("%d", &incoming);
+printf("Incoming packet size %d\n", incoming);
+if(incoming <= (buck_size - store)){
+store += incoming;
+printf("Bucket buffer size : %d out of %d\n", store, buck_size);
+} else {
+printf("Dropped %d no of packets\n", incoming - (buck_size - store));
+store = buck_size;
+printf("Bucket buffer size : %d out of %d\n", store, buck_size);
+}
+if(store >= outgoing){
+store = store - outgoing;
+} else {
+store = 0;
+}
+printf("After outgoing , There are %d out of %d packets left in buffer\n", store,
+buck_size);
+n--;
+}}
+
+
+
